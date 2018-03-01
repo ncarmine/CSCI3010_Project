@@ -17,8 +17,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     
     // Codable struct for json weather data returned by DarkSky
     struct WeatherData: Codable {
-        let latitude: Float
-        let longitude: Float
+        let latitude: Double
+        let longitude: Double
         let timezone: String
         let currently: Currently
     }
@@ -99,7 +99,10 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                     // Attempt to decode JSON data into WeatherData codeable struct
                     let data = try jsonDecoder.decode(WeatherData.self, from: data!)
                     // Add the temperature as an MKAnnotation set to the locationManager's coordinates
-                    let tempAnnotation = CityTemp(title: (String(data.currently.temperature)+"ºF"), coordinate: (self.locationManager.location?.coordinate)!)
+                    let tempAnnotation = CityTemp(
+                        title: (String(data.currently.temperature)+"ºF"),
+                        coordinate: CLLocationCoordinate2DMake(data.latitude, data.longitude)
+                    )
                     self.mapView.addAnnotation(tempAnnotation) // Add the annotation to the mapView
                 } catch let err {
                     print("Error", err)
@@ -117,6 +120,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
             let coordinates = locationManager.location?.coordinate
             if coordinates != nil {
                 centerMapOnLocation(location: CLLocation(latitude: coordinates!.latitude, longitude: coordinates!.longitude))
+                loadJSON(urlPath: "https://api.darksky.net/forecast/251044d8d01971a3d739a13ddd102c08/"+String(coordinates!.latitude)+","+String(coordinates!.longitude))
             }
         }
     }
