@@ -9,6 +9,8 @@ import UIKit
 import MapKit
 import CoreLocation
 
+
+
 class ViewController: UIViewController, CLLocationManagerDelegate {
     
     @IBOutlet weak var mapView: MKMapView!
@@ -33,17 +35,30 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         // Declare locationManager
         locationManager = CLLocationManager()
+        locationManager.delegate = self // delegate is this view
+        mapView.delegate = self
+        // Supposedly remove points of interest
+        // Currently, there is a bug where this does not entirely work: https://openradar.appspot.com/28980142
+        // As such, POIs may cause the temperature to not be displayed on the annotation and may required zooming in/out to see temp
+        mapView.showsPointsOfInterest = false
         // Set initalLocation to CU Boulder Engineering Center
         var initalLocation = CLLocation(latitude: 40.006275, longitude: -105.263536)
         
-        switch CLLocationManager.authorizationStatus() {
-        case .notDetermined:
-            // Request location services permission
-            locationManager.requestWhenInUseAuthorization()
-        case .denied, .restricted:
+        // Request location services permission
+        locationManager.requestWhenInUseAuthorization()
+        
+        if CLLocationManager.authorizationStatus() == .authorizedWhenInUse {
+            // Setup locationManager
+            locationManager.desiredAccuracy = kCLLocationAccuracyKilometer // ~1km accuracy is sufficient for weather
+            locationManager.requestLocation() // Request the current location of the device
+            let coordinates = locationManager.location?.coordinate // Gett coords of location
+            if coordinates != nil {
+                // Set initalLocation to coords where the device is - San Francisco in the simulator
+                initalLocation = CLLocation(latitude: coordinates!.latitude, longitude: coordinates!.longitude)
+            }
+        } else {
             // Tell user to enable location services when they have it disabled
             let alert = UIAlertController(title: "Location Services Disabled", message: "Enable location services in Settings to display temperatures in your local area", preferredStyle: .alert)
             let settingsAction = UIAlertAction(title: "Settings", style: .default, handler: { action in
@@ -55,32 +70,27 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
             alert.addAction(cancelAction)
             alert.addAction(settingsAction)
             present(alert, animated: true, completion: nil)
-        case .authorizedWhenInUse, .authorizedAlways:
-            // Setup locationManager
-            locationManager.delegate = self // delegate is this view
-            locationManager.desiredAccuracy = kCLLocationAccuracyKilometer // ~1km accuracy is sufficient for weather
-            locationManager.requestLocation() // Request the current location of the device
-            let coordinates = locationManager.location?.coordinate // Gett coords of location
-            if coordinates != nil {
-                // Set initalLocation to coords where the device is - San Francisco in the simulator
-                initalLocation = CLLocation(latitude: coordinates!.latitude, longitude: coordinates!.longitude)
-            }
         }
+        
+        
 
         centerMapOnLocation(location: initalLocation) // Center the map of the set location
-        // Load the DarkSky JSON at the selected location and add the annotation
-        loadJSON(urlPath: "https://api.darksky.net/forecast/251044d8d01971a3d739a13ddd102c08/"+String(initalLocation.coordinate.latitude)+","+String(initalLocation.coordinate.longitude))
+//         Load the DarkSky JSON at the selected location and add the annotation
+        loadTemperatureJSON(location: initalLocation.coordinate)
+        print("region:", mapView.region)
+        print("visibleRekt:", mapView.visibleMapRect)
     }
     
     func centerMapOnLocation(location: CLLocation) {
-        let regionRadius: CLLocationDistance = 5000 // ~5km
+        let regionRadius: CLLocationDistance = 10000 // ~10km
         let coordinateRegion = MKCoordinateRegionMakeWithDistance(location.coordinate, regionRadius, regionRadius)
         mapView.setRegion(coordinateRegion, animated: true)
     }
     
-    func loadJSON(urlPath: String) {
+    func loadTemperatureJSON(location: CLLocationCoordinate2D) {
+        print("load json", location)
         // Ensure given string is valid
-        guard let url = URL(string: urlPath) else {
+        guard let url = URL(string: "https://api.darksky.net/forecast/251044d8d01971a3d739a13ddd102c08/"+String(location.latitude)+","+String(location.longitude)) else {
             print("URL Error")
             return
         }
@@ -99,11 +109,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                     // Attempt to decode JSON data into WeatherData codeable struct
                     let data = try jsonDecoder.decode(WeatherData.self, from: data!)
                     // Add the temperature as an MKAnnotation set to the locationManager's coordinates
-                    let tempAnnotation = CityTemp(
-                        title: (String(data.currently.temperature)+"ºF"),
-                        coordinate: CLLocationCoordinate2DMake(data.latitude, data.longitude)
-                    )
-                    self.mapView.addAnnotation(tempAnnotation) // Add the annotation to the mapView
+                    self.addAnnotation(temperature: data.currently.temperature, coordinate: CLLocationCoordinate2DMake(data.latitude, data.longitude))
+                    
                 } catch let err {
                     print("Error", err)
                 }
@@ -112,7 +119,17 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         session.resume()
     }
     
+    func addAnnotation(temperature: Float, coordinate: CLLocationCoordinate2D) {
+        // Create a CityTemp MKAnnotation object to be added to the mapView
+        let tempAnnotation = CityTemp(
+            title: String(temperature)+"ºF",
+            coordinate: coordinate
+        )
+        self.mapView.addAnnotation(tempAnnotation) // Add the annotation to the mapView
+    }
+    
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        print("authorization change", status)
         if status == .authorizedWhenInUse {
             locationManager.delegate = self
             locationManager.desiredAccuracy = kCLLocationAccuracyKilometer
@@ -120,7 +137,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
             let coordinates = locationManager.location?.coordinate
             if coordinates != nil {
                 centerMapOnLocation(location: CLLocation(latitude: coordinates!.latitude, longitude: coordinates!.longitude))
-                loadJSON(urlPath: "https://api.darksky.net/forecast/251044d8d01971a3d739a13ddd102c08/"+String(coordinates!.latitude)+","+String(coordinates!.longitude))
+                self.addAnnotation(temperature: 52.8, coordinate: coordinates!)
+                loadTemperatureJSON(location: coordinates!)
             }
         }
     }
@@ -130,14 +148,32 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("locationManager fialed with error", error)
+        print("locationManager failed with error", error)
     }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+}
 
+extension ViewController: MKMapViewDelegate {
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        guard let annotation = annotation as? CityTemp else { return nil }
 
+        let identifer = "temperature"
+        var view: MKMarkerAnnotationView
+
+        if let dequeuedView = mapView.dequeueReusableAnnotationView(withIdentifier: identifer) as? MKMarkerAnnotationView {
+            dequeuedView.annotation = annotation
+            view = dequeuedView
+        } else {
+            view = MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifer)
+            view.titleVisibility = .visible
+            view.displayPriority = .required
+            view.canShowCallout = false
+        }
+        return view
+    }
 }
 

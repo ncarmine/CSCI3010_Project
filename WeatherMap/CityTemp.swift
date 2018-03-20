@@ -17,5 +17,6 @@ class CityTemp: NSObject, MKAnnotation {
     init(title: String, coordinate: CLLocationCoordinate2D) {
         self.title = title
         self.coordinate = coordinate
+        super.init()
     }
 }
