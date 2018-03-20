@@ -45,7 +45,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         mapView.showsPointsOfInterest = false
         // Set initalLocation to CU Boulder Engineering Center
         var initalLocation = CLLocation(latitude: 40.006275, longitude: -105.263536)
-        
         // Request location services permission
         locationManager.requestWhenInUseAuthorization()
         
@@ -75,10 +74,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         
 
         centerMapOnLocation(location: initalLocation) // Center the map of the set location
-//         Load the DarkSky JSON at the selected location and add the annotation
-        loadTemperatureJSON(location: initalLocation.coordinate)
-        print("region:", mapView.region)
-        print("visibleRekt:", mapView.visibleMapRect)
+        // Create five new temperature annotatations
+        addNewAnnotations()
     }
     
     func centerMapOnLocation(location: CLLocation) {
@@ -128,6 +125,26 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         self.mapView.addAnnotation(tempAnnotation) // Add the annotation to the mapView
     }
     
+    func addNewAnnotations() {
+        // Remove all currently existing annotations
+        mapView.removeAnnotations(mapView.annotations)
+        // Get region, center, latitudeDelta, and longitudeDelta
+        let region = mapView.region
+        let center = region.center
+        let latDelta = region.span.latitudeDelta
+        let longDelta = region.span.longitudeDelta
+        var locations = [center] // Initialize locations array with center
+        // Append other four locations starting at top left and moving clockwise
+        locations.append(CLLocationCoordinate2DMake(center.latitude + (latDelta / 4), center.longitude - (longDelta / 4)))
+        locations.append(CLLocationCoordinate2DMake(center.latitude + (latDelta / 4), center.longitude + (longDelta / 4)))
+        locations.append(CLLocationCoordinate2DMake(center.latitude - (latDelta / 4), center.longitude + (longDelta / 4)))
+        locations.append(CLLocationCoordinate2DMake(center.latitude - (latDelta / 4), center.longitude - (longDelta / 4)))
+        // Get the json data for each location and add its annotation
+        for location in locations {
+            loadTemperatureJSON(location: location)
+        }
+    }
+    
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         print("authorization change", status)
         if status == .authorizedWhenInUse {
@@ -137,8 +154,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
             let coordinates = locationManager.location?.coordinate
             if coordinates != nil {
                 centerMapOnLocation(location: CLLocation(latitude: coordinates!.latitude, longitude: coordinates!.longitude))
-                self.addAnnotation(temperature: 52.8, coordinate: coordinates!)
-                loadTemperatureJSON(location: coordinates!)
+                addNewAnnotations()
             }
         }
     }
