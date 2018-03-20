@@ -14,6 +14,9 @@ import CoreLocation
 class ViewController: UIViewController, CLLocationManagerDelegate {
     
     @IBOutlet weak var mapView: MKMapView!
+    @IBAction func getWeatherButton(_ sender: UIButton) {
+        addNewAnnotations()
+    }
     
     var locationManager: CLLocationManager!
     

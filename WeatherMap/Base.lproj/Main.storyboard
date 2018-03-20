@@ -21,13 +21,27 @@
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" showsBuildings="NO" showsPointsOfInterest="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3Ez-08-Yqn">
                                 <rect key="frame" x="0.0" y="20" width="375" height="647"/>
                             </mapView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="awJ-do-5V1">
+                                <rect key="frame" x="137" y="617" width="100" height="30"/>
+                                <color key="backgroundColor" white="0.94999999999999996" alpha="0.90000000000000002" colorSpace="calibratedWhite"/>
+                                <color key="tintColor" red="0.0" green="0.50196081400000003" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <state key="normal" title="Get Weather">
+                                    <color key="titleColor" red="0.0" green="0.50196081400000003" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                </state>
+                                <connections>
+                                    <action selector="getWeatherButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="WCi-M6-oXk"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstItem="awJ-do-5V1" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="137" id="7TJ-ad-2er"/>
                             <constraint firstAttribute="trailing" secondItem="3Ez-08-Yqn" secondAttribute="trailing" id="S1t-j5-K3N"/>
                             <constraint firstItem="3Ez-08-Yqn" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="Sil-bd-D0e"/>
+                            <constraint firstAttribute="bottom" secondItem="awJ-do-5V1" secondAttribute="bottom" constant="20" symbolic="YES" id="Z0e-z3-FOD"/>
                             <constraint firstItem="3Ez-08-Yqn" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" id="jCT-5A-Nvw"/>
                             <constraint firstItem="3Ez-08-Yqn" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="u5L-IN-8ua"/>
+                            <constraint firstItem="awJ-do-5V1" firstAttribute="centerX" secondItem="3Ez-08-Yqn" secondAttribute="centerX" id="xSv-k8-UGU"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
