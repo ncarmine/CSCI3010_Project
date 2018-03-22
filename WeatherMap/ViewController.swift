@@ -14,26 +14,74 @@ import CoreLocation
 class ViewController: UIViewController, CLLocationManagerDelegate {
     
     @IBOutlet weak var mapView: MKMapView!
+    @IBOutlet weak var timeSelected: UISegmentedControl!
+    
     @IBAction func getWeatherButton(_ sender: UIButton) {
         addNewAnnotations()
     }
     
+    @IBAction func timeSelectorChanged(_ sender: UISegmentedControl) {
+        print("timeSelectorChanged")
+        changeAnnotationTime()
+    }
+    
+    
     var locationManager: CLLocationManager!
+    var weatherOnMap = [WeatherData]()
+    let timeSelections = [
+        0: 0, // Currently
+        1: 1, // 1hr out
+        2: 2,
+        3: 3,
+        4: 6, // 6hrs out
+        5: 12,
+        6: 1, // 1 day out
+        7: 2,
+        8: 3
+    ]
     
     // Codable struct for json weather data returned by DarkSky
     struct WeatherData: Codable {
         let latitude: Double
         let longitude: Double
         let timezone: String
-        let currently: Currently
+        let currently: HourData
+        let hourly: HourWeather
+        let daily: DayWeather
     }
     
-    // Separate struct for the "currently" dictionary within the json response
-    struct Currently: Codable {
+    // Separate struct for the "currently" and "hourly" dictionary within the json response
+    struct HourData: Codable {
         let time: UInt64
         let temperature: Float
         let apparentTemperature: Float
         let humidity: Float
+        let precipProbability: Float
+    }
+    
+    // Struct for daily weather
+    struct DayData: Codable {
+        let time: UInt64
+        let temperatureHigh: Float
+        let temperatureLow: Float
+        let apparentTemperatureHigh: Float
+        let apparentTemperatureLow: Float
+        let humidity: Float
+        let precipProbability: Float
+    }
+    
+    // Struct for "hourly" weather
+    struct HourWeather: Codable {
+        let summary: String
+        let icon: String
+        let data: [HourData]
+    }
+    
+    // Struct for "daily" weather
+    struct DayWeather: Codable {
+        let summary: String
+        let icon: String
+        let data: [DayData] // Dayta
     }
     
     override func viewDidLoad() {
@@ -42,6 +90,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         locationManager = CLLocationManager()
         locationManager.delegate = self // delegate is this view
         mapView.delegate = self
+//        let rect = CGRect(x: 14, y: 14, width: UIScreen.main.bounds.width-28, height: 30)
+//        let timeSlider = StepSlider(frame: rect, values: [1, 2, 3, 4, 5], callback: {(f: Float) -> Void in print("slider", f)})
+//        mapView.addSubview(timeSlider)
         // Supposedly remove points of interest
         // Currently, there is a bug where this does not entirely work: https://openradar.appspot.com/28980142
         // As such, POIs may cause the temperature to not be displayed on the annotation and may required zooming in/out to see temp
@@ -74,8 +125,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
             present(alert, animated: true, completion: nil)
         }
         
-        
-
         centerMapOnLocation(location: initalLocation) // Center the map of the set location
         // Create five new temperature annotatations
         addNewAnnotations()
@@ -109,8 +158,21 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                     // Attempt to decode JSON data into WeatherData codeable struct
                     let data = try jsonDecoder.decode(WeatherData.self, from: data!)
                     // Add the temperature as an MKAnnotation set to the locationManager's coordinates
-                    self.addAnnotation(temperature: data.currently.temperature, coordinate: CLLocationCoordinate2DMake(data.latitude, data.longitude))
-                    
+                    let timeIndex = self.timeSelected.selectedSegmentIndex
+                    switch timeIndex {
+                    case 0:
+                        self.addAnnotation(temperature: data.currently.temperature, coordinate: CLLocationCoordinate2DMake(data.latitude, data.longitude))
+                        break
+                    case 1, 2, 3, 4, 5:
+                        self.addAnnotation(temperature: data.hourly.data[self.timeSelections[timeIndex]!].temperature, coordinate: CLLocationCoordinate2DMake(data.latitude, data.longitude))
+                        break
+                    case 6, 7, 8:
+                        self.addAnnotation(temperature: data.daily.data[self.timeSelections[timeIndex]!].temperatureHigh, coordinate: CLLocationCoordinate2DMake(data.latitude, data.longitude))
+                        break
+                    default:
+                        break
+                    }
+                    self.weatherOnMap.append(data)
                 } catch let err {
                     print("Error", err)
                 }
@@ -131,6 +193,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     func addNewAnnotations() {
         // Remove all currently existing annotations
         mapView.removeAnnotations(mapView.annotations)
+        weatherOnMap.removeAll()
         // Get region, center, latitudeDelta, and longitudeDelta
         let region = mapView.region
         let center = region.center
@@ -145,6 +208,38 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         // Get the json data for each location and add its annotation
         for location in locations {
             loadTemperatureJSON(location: location)
+        }
+    }
+    
+    func changeAnnotationTime() {
+        let timeIndex = self.timeSelected.selectedSegmentIndex
+        switch timeIndex {
+        case 0:
+            for (annotation, weather) in zip(self.mapView.annotations, self.weatherOnMap) {
+                let mapAnno:CityTemp = annotation as! CityTemp
+                mapAnno.title = String(weather.currently.temperature)
+                self.mapView.removeAnnotation(annotation)
+                self.mapView.addAnnotation(mapAnno)
+            }
+            break
+        case 1, 2, 3, 4, 5:
+            for (annotation, weather) in zip(self.mapView.annotations, self.weatherOnMap) {
+                let mapAnno:CityTemp = annotation as! CityTemp
+                mapAnno.title = String(weather.hourly.data[self.timeSelections[timeIndex]!].temperature)
+                self.mapView.removeAnnotation(annotation)
+                self.mapView.addAnnotation(mapAnno)
+            }
+            break
+        case 6, 7, 8:
+            for (annotation, weather) in zip(self.mapView.annotations, self.weatherOnMap) {
+                let mapAnno:CityTemp = annotation as! CityTemp
+                mapAnno.title = String(weather.daily.data[self.timeSelections[timeIndex]!].temperatureHigh)
+                self.mapView.removeAnnotation(annotation)
+                self.mapView.addAnnotation(mapAnno)
+            }
+            break
+        default:
+            break
         }
     }
     

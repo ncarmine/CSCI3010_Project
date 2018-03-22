@@ -15,6 +15,7 @@
 		63381793204674F5001C24DC /* WeatherMapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63381792204674F5001C24DC /* WeatherMapTests.swift */; };
 		6338179E204674F6001C24DC /* WeatherMapUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6338179D204674F6001C24DC /* WeatherMapUITests.swift */; };
 		633817AD2046B031001C24DC /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 633817AC2046B031001C24DC /* MapKit.framework */; };
+		63509DA8206226B100D85786 /* StepSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63509DA7206226B100D85786 /* StepSlider.swift */; };
 		63BE040A2047C2AC0003A936 /* CityTemp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63BE04092047C2AC0003A936 /* CityTemp.swift */; };
 /* End PBXBuildFile section */
 
@@ -50,6 +51,7 @@
 		6338179D204674F6001C24DC /* WeatherMapUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherMapUITests.swift; sourceTree = "<group>"; };
 		6338179F204674F6001C24DC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		633817AC2046B031001C24DC /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
+		63509DA7206226B100D85786 /* StepSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepSlider.swift; sourceTree = "<group>"; };
 		63BE04092047C2AC0003A936 /* CityTemp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CityTemp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -105,6 +107,7 @@
 			children = (
 				6338177D204674F5001C24DC /* AppDelegate.swift */,
 				6338177F204674F5001C24DC /* ViewController.swift */,
+				63509DA7206226B100D85786 /* StepSlider.swift */,
 				63BE04092047C2AC0003A936 /* CityTemp.swift */,
 				63381781204674F5001C24DC /* Main.storyboard */,
 				63381784204674F5001C24DC /* Assets.xcassets */,
@@ -281,6 +284,7 @@
 			files = (
 				63381780204674F5001C24DC /* ViewController.swift in Sources */,
 				63BE040A2047C2AC0003A936 /* CityTemp.swift in Sources */,
+				63509DA8206226B100D85786 /* StepSlider.swift in Sources */,
 				6338177E204674F5001C24DC /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

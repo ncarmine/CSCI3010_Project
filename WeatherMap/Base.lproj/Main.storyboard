@@ -23,7 +23,7 @@
                             </mapView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="awJ-do-5V1">
                                 <rect key="frame" x="137" y="617" width="100" height="30"/>
-                                <color key="backgroundColor" white="0.94999999999999996" alpha="0.90000000000000002" colorSpace="calibratedWhite"/>
+                                <color key="backgroundColor" white="0.94999999999999996" alpha="0.94999999999999996" colorSpace="calibratedWhite"/>
                                 <color key="tintColor" red="0.0" green="0.50196081400000003" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <state key="normal" title="Get Weather">
                                     <color key="titleColor" red="0.0" green="0.50196081400000003" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
@@ -32,6 +32,25 @@
                                     <action selector="getWeatherButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="WCi-M6-oXk"/>
                                 </connections>
                             </button>
+                            <segmentedControl opaque="NO" contentMode="scaleToFill" fixedFrame="YES" restorationIdentifier="timeSelector" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="3Hr-Lh-8Jm">
+                                <rect key="frame" x="16" y="30" width="343" height="29"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" white="0.94999999999999996" alpha="0.94999999999999996" colorSpace="calibratedWhite"/>
+                                <segments>
+                                    <segment title="Now"/>
+                                    <segment title="1h"/>
+                                    <segment title="2h"/>
+                                    <segment title="3h"/>
+                                    <segment title="6h"/>
+                                    <segment title="12h"/>
+                                    <segment title="1d"/>
+                                    <segment title="2d"/>
+                                    <segment title="3d"/>
+                                </segments>
+                                <connections>
+                                    <action selector="timeSelectorChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="WvB-YU-X6f"/>
+                                </connections>
+                            </segmentedControl>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
@@ -47,6 +66,7 @@
                     </view>
                     <connections>
                         <outlet property="mapView" destination="3Ez-08-Yqn" id="Jg8-ed-RRW"/>
+                        <outlet property="timeSelected" destination="3Hr-Lh-8Jm" id="108-01-Ydz"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
