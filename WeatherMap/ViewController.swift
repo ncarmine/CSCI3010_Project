@@ -9,8 +9,6 @@ import UIKit
 import MapKit
 import CoreLocation
 
-
-
 class ViewController: UIViewController, CLLocationManagerDelegate {
     
     @IBOutlet weak var mapView: MKMapView!
@@ -21,7 +19,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     }
     
     @IBAction func timeSelectorChanged(_ sender: UISegmentedControl) {
-        print("timeSelectorChanged")
         changeAnnotationTime()
     }
     
@@ -50,26 +47,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         let daily: DayWeather
     }
     
-    // Separate struct for the "currently" and "hourly" dictionary within the json response
-    struct HourData: Codable {
-        let time: UInt64
-        let temperature: Float
-        let apparentTemperature: Float
-        let humidity: Float
-        let precipProbability: Float
-    }
-    
-    // Struct for daily weather
-    struct DayData: Codable {
-        let time: UInt64
-        let temperatureHigh: Float
-        let temperatureLow: Float
-        let apparentTemperatureHigh: Float
-        let apparentTemperatureLow: Float
-        let humidity: Float
-        let precipProbability: Float
-    }
-    
     // Struct for "hourly" weather
     struct HourWeather: Codable {
         let summary: String
@@ -84,15 +61,33 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         let data: [DayData] // Dayta
     }
     
+    // Struct for the "currently" weather and data within "hourly" weather
+    struct HourData: Codable {
+        let time: UInt64
+        let temperature: Float
+        let apparentTemperature: Float
+        let humidity: Float
+        let precipProbability: Float
+    }
+    
+    // Struct for data within daily weather
+    struct DayData: Codable {
+        let time: UInt64
+        let temperatureHigh: Float
+        let temperatureLow: Float
+        let apparentTemperatureHigh: Float
+        let apparentTemperatureLow: Float
+        let humidity: Float
+        let precipProbability: Float
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Declare locationManager
         locationManager = CLLocationManager()
         locationManager.delegate = self // delegate is this view
         mapView.delegate = self
-//        let rect = CGRect(x: 14, y: 14, width: UIScreen.main.bounds.width-28, height: 30)
-//        let timeSlider = StepSlider(frame: rect, values: [1, 2, 3, 4, 5], callback: {(f: Float) -> Void in print("slider", f)})
-//        mapView.addSubview(timeSlider)
+        
         // Supposedly remove points of interest
         // Currently, there is a bug where this does not entirely work: https://openradar.appspot.com/28980142
         // As such, POIs may cause the temperature to not be displayed on the annotation and may required zooming in/out to see temp
@@ -130,6 +125,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         addNewAnnotations()
     }
     
+    // Center the map over the current location
     func centerMapOnLocation(location: CLLocation) {
         let regionRadius: CLLocationDistance = 10000 // ~10km
         let coordinateRegion = MKCoordinateRegionMakeWithDistance(location.coordinate, regionRadius, regionRadius)
@@ -137,7 +133,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     }
     
     func loadTemperatureJSON(location: CLLocationCoordinate2D) {
-        print("load json", location)
         // Ensure given string is valid
         guard let url = URL(string: "https://api.darksky.net/forecast/251044d8d01971a3d739a13ddd102c08/"+String(location.latitude)+","+String(location.longitude)) else {
             print("URL Error")
@@ -160,18 +155,19 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                     // Add the temperature as an MKAnnotation set to the locationManager's coordinates
                     let timeIndex = self.timeSelected.selectedSegmentIndex
                     switch timeIndex {
-                    case 0:
+                    case 0: // Currently
                         self.addAnnotation(temperature: data.currently.temperature, coordinate: CLLocationCoordinate2DMake(data.latitude, data.longitude))
                         break
-                    case 1, 2, 3, 4, 5:
+                    case 1, 2, 3, 4, 5: // Hourly
                         self.addAnnotation(temperature: data.hourly.data[self.timeSelections[timeIndex]!].temperature, coordinate: CLLocationCoordinate2DMake(data.latitude, data.longitude))
                         break
-                    case 6, 7, 8:
+                    case 6, 7, 8: // Daily
                         self.addAnnotation(temperature: data.daily.data[self.timeSelections[timeIndex]!].temperatureHigh, coordinate: CLLocationCoordinate2DMake(data.latitude, data.longitude))
                         break
                     default:
                         break
                     }
+                    // Append the data to the array of data currently on the map
                     self.weatherOnMap.append(data)
                 } catch let err {
                     print("Error", err)
@@ -211,18 +207,21 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         }
     }
     
+    // Change the weather to a new time, given the time selector
     func changeAnnotationTime() {
         let timeIndex = self.timeSelected.selectedSegmentIndex
         switch timeIndex {
-        case 0:
+        case 0: // Current weather
+            // Get the annotation and weather - indexd the same
             for (annotation, weather) in zip(self.mapView.annotations, self.weatherOnMap) {
-                let mapAnno:CityTemp = annotation as! CityTemp
-                mapAnno.title = String(weather.currently.temperature)
+                let mapAnno:CityTemp = annotation as! CityTemp // Create a new annotation with the old one
+                mapAnno.title = String(weather.currently.temperature) // Change the title
+                // Replace the old annotation with the new one
                 self.mapView.removeAnnotation(annotation)
                 self.mapView.addAnnotation(mapAnno)
             }
             break
-        case 1, 2, 3, 4, 5:
+        case 1, 2, 3, 4, 5: // Hourly weather
             for (annotation, weather) in zip(self.mapView.annotations, self.weatherOnMap) {
                 let mapAnno:CityTemp = annotation as! CityTemp
                 mapAnno.title = String(weather.hourly.data[self.timeSelections[timeIndex]!].temperature)
@@ -230,7 +229,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                 self.mapView.addAnnotation(mapAnno)
             }
             break
-        case 6, 7, 8:
+        case 6, 7, 8: // Daily weather
             for (annotation, weather) in zip(self.mapView.annotations, self.weatherOnMap) {
                 let mapAnno:CityTemp = annotation as! CityTemp
                 mapAnno.title = String(weather.daily.data[self.timeSelections[timeIndex]!].temperatureHigh)
@@ -244,7 +243,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        print("authorization change", status)
+        // If the authorization changes to WhenInUse, setup the locationManager, center the map, and add annotations
         if status == .authorizedWhenInUse {
             locationManager.delegate = self
             locationManager.desiredAccuracy = kCLLocationAccuracyKilometer
@@ -258,7 +257,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        print(locations)
+        
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
@@ -271,6 +270,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     }
 }
 
+// Custom annotation controls to aid in displaying title
 extension ViewController: MKMapViewDelegate {
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         guard let annotation = annotation as? CityTemp else { return nil }
