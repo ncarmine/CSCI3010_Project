@@ -9,6 +9,8 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import kotlinx.coroutines.experimental.async
+import java.net.URL
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -39,5 +41,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val sydney = LatLng(-34.0, 151.0)
         mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+
+        async {
+            val result = URL("https://api.darksky.net/forecast/251044d8d01971a3d739a13ddd102c08/40.006275,-105.263536").readText()
+            runOnUiThread {
+                print(result)
+            }
+        }
     }
 }
