@@ -12,6 +12,12 @@ import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.coroutines.experimental.async
 import java.net.URL
 
+import kotlinx.serialization.*
+import kotlinx.serialization.json.JSON
+
+@Serializable
+data class Weather(val timezone: String, val latitude: Double, val longitude: Double)
+
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
