@@ -4,7 +4,8 @@
 > Add to the Android map view temperatures for the ten largest surrounding cities
 
 ### What I actually accomplished
-* Add to the map view temperatures for five surrounding areas
+* An Android app that displays a map centered at the user’s location that has the temperature displayed over their current city
+* Add to the map view temperatures for four surrounding areas (for a total of five pins)
 
 ### What I plan to do for the next checkpoint
 * Get the user's location
