@@ -17,6 +17,7 @@ import kotlinx.serialization.json.JSON
 import android.os.StrictMode
 import android.widget.ImageButton
 import com.google.android.gms.maps.model.Marker
+import kotlin.math.abs
 
 
 // Serializable Weather and CurrentData data classes to put json data into
@@ -86,14 +87,19 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     marker.remove()
                 }
                 markers = emptyArray() // Empty marker array
-                // Get the region of the current map
-                val region = mMap.projection.visibleRegion
-                // Put markers in the center, and each corner
-                addMarkerFromJSON(mMap.cameraPosition.target)
-                addMarkerFromJSON(region.farLeft)
-                addMarkerFromJSON(region.farRight)
-                addMarkerFromJSON(region.nearLeft)
-                addMarkerFromJSON(region.nearRight)
+                // Get the region of the current map and center
+                val region = mMap.projection.visibleRegion.latLngBounds
+                val center = region.center
+                val top = center.latitude + abs((center.latitude - region.northeast.latitude)/2)
+                val bottom = center.latitude - abs((center.latitude - region.southwest.latitude)/2)
+                val left = center.longitude - abs((center.longitude - region.southwest.longitude)/2)
+                val right = center.longitude + abs((center.longitude - region.northeast.longitude)/2)
+                // Put markers in the center and each corner, starting with top-left and moving clockwise
+                addMarkerFromJSON(center)
+                addMarkerFromJSON(LatLng(top, left))
+                addMarkerFromJSON(LatLng(top, right))
+                addMarkerFromJSON(LatLng(bottom, right))
+                addMarkerFromJSON(LatLng(bottom, left))
             }
         }
     }
