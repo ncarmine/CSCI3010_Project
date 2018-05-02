@@ -15,7 +15,8 @@ import java.net.URL
 import kotlinx.serialization.*
 import kotlinx.serialization.json.JSON
 import android.os.StrictMode
-
+import android.widget.ImageButton
+import com.google.android.gms.maps.model.Marker
 
 
 // Serializable Weather and CurrentData data classes to put json data into
@@ -28,6 +29,7 @@ data class CurrentData(val time: Long, val temperature: Float, val apparentTempe
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
+    private var markers = arrayOf<Marker>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +38,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager
                 .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+        val fetchWeatherBtn: ImageButton = findViewById(R.id.fetchWeatherBtn)
+        fetchWeatherBtn.setOnClickListener { fetchWeather() }
     }
 
     /**
@@ -52,25 +57,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         // Engineering Center location
         val location = LatLng(40.006275, -105.263536)
         // Focus over center
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 13.5f))
-        // Enable multiple async
-        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-        StrictMode.setThreadPolicy(policy)
-        async {
-            runOnUiThread {
-                // Get the region of the current map
-                val region = mMap.projection.visibleRegion
-                // Put markers in the center, and each corner
-                addMarkerFromJSON(location)
-                addMarkerFromJSON(region.farLeft)
-                addMarkerFromJSON(region.farRight)
-                addMarkerFromJSON(region.nearLeft)
-                addMarkerFromJSON(region.nearRight)
-            }
-        }
-        // Zoom outwards
-        mMap.moveCamera(CameraUpdateFactory.zoomTo(12.5f))
-
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 12.5f))
+        // Get current weather points
+        fetchWeather()
     }
 
     fun addMarkerFromJSON(location: LatLng) {
@@ -81,9 +70,31 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 // Serialize JSON for easy referencing
                 val weather = JSON.nonstrict.parse<Weather>(result)
                 // Add a marker at the location
-                mMap.addMarker(MarkerOptions().position(LatLng(weather.latitude, weather.longitude)).title(weather.currently.temperature.toString()))
+                markers += mMap.addMarker(MarkerOptions().position(LatLng(weather.latitude, weather.longitude)).title(weather.currently.temperature.toString()))
             }
         }
+    }
 
+    fun fetchWeather() {
+        // Enable multiple async
+        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
+        async {
+            runOnUiThread {
+                // Remove existing markers
+                for (marker in markers) {
+                    marker.remove()
+                }
+                markers = emptyArray() // Empty marker array
+                // Get the region of the current map
+                val region = mMap.projection.visibleRegion
+                // Put markers in the center, and each corner
+                addMarkerFromJSON(mMap.cameraPosition.target)
+                addMarkerFromJSON(region.farLeft)
+                addMarkerFromJSON(region.farRight)
+                addMarkerFromJSON(region.nearLeft)
+                addMarkerFromJSON(region.nearRight)
+            }
+        }
     }
 }
