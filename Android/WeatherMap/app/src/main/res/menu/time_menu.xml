@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/time_current"
+        android:title="@string/time_current" />
+    <item
+        android:id="@+id/time_1h"
+        android:title="@string/time_1h" />
+    <item
+        android:id="@+id/time_2h"
+        android:title="@string/time_2h" />
+    <item
+        android:id="@+id/time_3h"
+        android:title="@string/time_3h" />
+    <item
+        android:id="@+id/time_6h"
+        android:title="@string/time_6h" />
+    <item
+        android:id="@+id/time_12h"
+        android:title="@string/time_12h" />
+    <item
+        android:id="@+id/time_1d"
+        android:title="@string/time_1d" />
+    <item
+        android:id="@+id/time_2d"
+        android:title="@string/time_2d" />
+    <item
+        android:id="@+id/time_3d"
+        android:title="@string/time_3d" />
+</menu>

@@ -1,4 +1,13 @@
 <resources>
     <string name="app_name">Weather Map</string>
     <string name="title_activity_maps">Weather Map</string>
+    <string name="time_current">Now</string>
+    <string name="time_1h">1h</string>
+    <string name="time_2h">2h</string>
+    <string name="time_3h">3h</string>
+    <string name="time_6h">6h</string>
+    <string name="time_12h">12h</string>
+    <string name="time_1d">1d</string>
+    <string name="time_2d">2d</string>
+    <string name="time_3d">3d</string>
 </resources>
