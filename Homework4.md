@@ -12,7 +12,7 @@
 > Basic Android App that loads json, but just displays, "Hello, World!"
 
 ### Screenshots
-![](/Weather_current.png)
-![](/Weather_6h.png)
-![](/Weather_2d.png)
-![](/New_Weather.png)
+![](/images/iOS_Weather_current.png)
+![](/images/iOS_Weather_6h.png)
+![](/images/iOS_Weather_2d.png)
+![](/images/iOS_New_Weather.png)
