@@ -12,4 +12,4 @@ Once whether location services are enabld is determined, I accomplished what I i
 I plan on maintaining this schedule.
 
 ### Screenshots
-![Temperature in San Francisco](/SanFranTemp.png)
+![Temperature in San Francisco](/images/iOS_SanFranTemp.png)
