@@ -8,4 +8,4 @@
 > An Android app that displays a map centered at the user’s location that has the temperature displayed over their current city
 
 ### Screenshots
-![](/Androidv1.png)
+![](/images/Androidv1.png)
