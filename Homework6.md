@@ -14,4 +14,4 @@
 * Android version in line with iOS version: Add a timeline “scrubber” to allow the user to select temperatures hours or days ahead of the current time in Android
 
 ### Screenshots
-![](/Androidv2.png)
+![](/images/Androidv2.png)
